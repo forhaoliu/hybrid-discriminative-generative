@@ -12,6 +12,8 @@ This is code is built upon the official code of the great work [JEM](https://git
 
 Includes codes and scripts for training UDGE and baselines using WideResNet.
 
+For any questions/issues please contact hao.liu@cs.berkeley.edu.
+
 ## Usage
 The experiment environemnt is provided in [this conda env](udge.yaml).
 ### Training
@@ -34,7 +36,7 @@ python train_wrn_ebm.py --lr .0001 --dataset cifar10 --optimizer adam --pyxce 1.
 
 You can use the [viskit](viskit) from [this open souce code](https://github.com/vitchyr/viskit) to track the experiment progress.
 
-Stay tuned for a distributed version that scales better.
+Stay tuned for pretrained model and distributed code that scales better.
 
 
 ### Evaluation
