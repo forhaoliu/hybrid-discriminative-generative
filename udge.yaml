@@ -1,0 +1,34 @@
+name: udge
+channels:
+- kne
+- pytorch
+- anaconda
+dependencies:
+- python=3.6.3
+- pytorch>=1.5
+- torchvision>=0.6.0
+- cudatoolkit=10.1
+- matplotlib
+- seaborn
+- glob2
+- mkl
+- numpy
+- scipy
+- pyqt
+- pip
+- pip:
+  - ipdb
+  - scikit-learn
+  - setuptools
+  - panda
+  - click
+  - pylint
+  - tqdm
+  - joblib
+  - progressbar2
+  - pyyaml
+  - autopep8
+  - tensorboard
+  - setGPU
+  - gpustat
+
