@@ -1,4 +1,4 @@
-This is the official code for the paper [Unification of Supervised Learning and ContrastiveLearning through Energy-based Models](http://arxiv.org/abs/2007.09070).
+This is the official code for the paper [Hybrid Discriminative-Generative Training via Contrastive Learning](http://arxiv.org/abs/2007.09070).
 
 
 This is code is built upon the official code of the great work [JEM](https://github.com/wgrathwohl/JEM).
@@ -32,9 +32,7 @@ python train_wrn_ebm.py --lr .0001 --dataset cifar10 --optimizer adam --pyxce 1.
 ***NOTE***
 
 
-You can use the [viskit](viskit) to track the experiment progress.
-
-We don't tune the hyperparameters and basically follow the settings of JEM, you may find it's helpful to tune the hyperparameters of UDGE to obtain better results.
+You can use the [viskit](viskit) from [this open souce code](https://github.com/vitchyr/viskit) to track the experiment progress.
 
 Stay tuned for a distributed version that scales better.
 
@@ -68,7 +66,6 @@ python eval_wrn_ebm.py --load_path /PATH/TO/YOUR/MODEL.pt --eval cond_samples --
 
 
 
-
 ### Acknowledgement
 
-This code is based on [this open source implementation](https://github.com/wgrathwohl/JEM). The UDGE model is adapted from [this source code](https://github.com/facebookresearch/moco).
+This code is based on [this open source implementation](https://github.com/wgrathwohl/JEM). The UDGE model is adapted from [this open source code](https://github.com/facebookresearch/moco).
