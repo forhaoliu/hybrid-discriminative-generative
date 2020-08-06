@@ -5,7 +5,7 @@ import os
 import sys
 import uuid
 from collections import OrderedDict
-from os.path import abspath, basename, dirname
+from os.path import abspath, dirname
 from types import SimpleNamespace
 
 import torch
@@ -20,7 +20,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def get_model_and_buffer(args, sample_q):
-    if args.pxycontrast > 0 or args.pxyjointcontrast > 0 or args.pxcontrast > 0:
+    if args.pxycontrast > 0 or args.pxcontrast > 0:
         f = HYM(args)
     else:
         model_cls = F if args.uncond else CCF
@@ -316,6 +316,11 @@ if __name__ == "__main__":
     parser.add_argument("--reinit_freq", type=float, default=0.05)
     parser.add_argument("--sgld_lr", type=float, default=1.0)
     parser.add_argument("--sgld_std", type=float, default=1e-2)
+    parser.add_argument("--contrast_k", type=int, default=65536, help="number of negative samples")
+    parser.add_argument("--contrast_t", default=0.1, type=float, help="softmax temperature (default: 0.1)")
+    parser.add_argument("--smoothing", default=0.0, type=float)
+    parser.add_argument("--workers", default=4, type=int, metavar="N", help="number of data loading workers")
+    parser.add_argument("--seed", default=None, type=int, help="seed for initializing training. ")
     # logging + evaluation
     parser.add_argument("--log_dir", type=str, default="./save/tmp")
     parser.add_argument("--id", default="testofhybridshit", type=str)
@@ -324,16 +329,10 @@ if __name__ == "__main__":
     parser.add_argument("--eval_every", type=int, default=1, help="Epochs between evaluation")
     parser.add_argument("--print_every", type=int, default=100, help="Iterations between print")
     parser.add_argument("--load_path", type=str, default=None)
-    parser.add_argument("--plot_uncond", choices=[0, 1], type=float, default=1)
-    parser.add_argument("--plot_cond", choices=[0, 1], type=float, default=1)
-    parser.add_argument("--plot_contrast", choices=[0, 1], type=float, default=1)
+    parser.add_argument("--plot_uncond", choices=[0, 1], type=float, default=0)
+    parser.add_argument("--plot_cond", choices=[0, 1], type=float, default=0)
+    parser.add_argument("--plot_contrast", choices=[0, 1], type=float, default=0)
     parser.add_argument("--n_valid", type=int, default=5000)
-    # Sim part
-    parser.add_argument("--contrast_k", type=int, default=65536, help="number of negative samples")
-    parser.add_argument("--contrast_t", default=0.1, type=float, help="softmax temperature (default: 0.1)")
-    parser.add_argument("--smoothing", default=0.0, type=float)
-    parser.add_argument("--workers", default=4, type=int, metavar="N", help="number of data loading workers")
-    parser.add_argument("--seed", default=None, type=int, help="seed for initializing training. ")
     args = parser.parse_args()
 
     if args.load_path is not None:

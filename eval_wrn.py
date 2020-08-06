@@ -25,7 +25,7 @@ from logger import logger, setup_logger
 from model import CCF, HYM, F
 from utils import init_random, plot, set_seed, smooth_one_hot
 
-
+DATA_PATH = "/data/"
 sns.set_style("whitegrid")
 sns.set_context("paper", font_scale=1, rc={"grid.linewidth": 1})
 fontsize = 20
@@ -170,12 +170,12 @@ def logp_hist(f, args):
     )
 
     datasets = {
-        "cifar10": torchvision.datasets.CIFAR10(root="~/data", transform=transform_test, download=True, train=False),
-        "cifar10interp": torchvision.datasets.CIFAR10(root="~/data", transform=transform_test, download=True, train=False),
-        "svhn": torchvision.datasets.SVHN(root="~/data", transform=transform_test, download=True, split="train"),  # "test"
-        "cifar100": torchvision.datasets.CIFAR100(root="~/data", transform=transform_test, download=True, train=False),
+        "cifar10": torchvision.datasets.CIFAR10(root=DATA_PATH, transform=transform_test, download=True, train=False),
+        "cifar10interp": torchvision.datasets.CIFAR10(root=DATA_PATH, transform=transform_test, download=True, train=False),
+        "svhn": torchvision.datasets.SVHN(root=DATA_PATH, transform=transform_test, download=True, split="train"),  # "test"
+        "cifar100": torchvision.datasets.CIFAR100(root=DATA_PATH, transform=transform_test, download=True, train=False),
         "celeba": torchvision.datasets.CelebA(
-            root="~/data",
+            root=DATA_PATH,
             transform=transforms.Compose(
                 [
                     transforms.Resize(32),
@@ -217,7 +217,7 @@ def logp_hist(f, args):
         score_dict[dataset_name] = this_scores
 
     for idx, (name, scores) in enumerate(score_dict.items()):
-        plt.hist(scores, label=name, bins=100, normed=True, alpha=0.5, color=seaborns[idx])
+        plt.hist(scores, label=name, bins=100, density=True, alpha=0.5, color=seaborns[idx])
     plt.xlabel("Score")
     plt.ylabel("Frequency")
     plt.xlim(xmin=0)
@@ -226,7 +226,9 @@ def logp_hist(f, args):
     plt.legend(loc=4, bbox_to_anchor=(0.9, 0.05), ncol=1)
     fname = "-".join(args.datasets)
     fname = "id-{}-".format(args.id) + fname
-    savedir = "./save/hist/save"
+    savedir = "./save/evaluation/ood_hist_plots"
+    print("....")
+    print("the plotted historgams can be found in {}".format(savedir))
     os.makedirs(savedir, exist_ok=True)
     plt.savefig("{}/logp-hist-{}-fig.png".format(savedir, fname), bbox_inches="tight", pad_inches=0)
     plt.savefig("{}/logp-hist-{}-fig.pdf".format(savedir, fname), bbox_inches="tight", pad_inches=0)
@@ -246,16 +248,16 @@ def OODAUC(f, args):
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)), lambda x: x + args.sigma * torch.randn_like(x)]
     )
 
-    dset_real = torchvision.datasets.CIFAR10(root="~/data", transform=transform_test, download=True, train=False)
+    dset_real = torchvision.datasets.CIFAR10(root=DATA_PATH, transform=transform_test, download=True, train=False)
     dload_real = DataLoader(dset_real, batch_size=args.batch_size, shuffle=False, num_workers=args.workers, drop_last=False)
 
     if args.ood_dataset == "svhn":
-        dset_fake = torchvision.datasets.SVHN(root="~/data", transform=transform_test, download=True, split="test")
+        dset_fake = torchvision.datasets.SVHN(root=DATA_PATH, transform=transform_test, download=True, split="test")
     elif args.ood_dataset == "cifar100":
-        dset_fake = torchvision.datasets.CIFAR100(root="~/data", transform=transform_test, download=True, train=False)
+        dset_fake = torchvision.datasets.CIFAR100(root=DATA_PATH, transform=transform_test, download=True, train=False)
     elif args.ood_dataset == "celeba":
         dset_fake = torchvision.datasets.CelebA(
-            root="~/data",
+            root=DATA_PATH,
             transform=transforms.Compose(
                 [
                     transforms.Resize(32),
@@ -268,7 +270,7 @@ def OODAUC(f, args):
             split="all",
         )
     else:
-        dset_fake = torchvision.datasets.CIFAR10(root="~/data", transform=transform_test, download=True, train=False)
+        dset_fake = torchvision.datasets.CIFAR10(root=DATA_PATH, transform=transform_test, download=True, train=False)
 
     dload_fake = DataLoader(dset_fake, batch_size=args.batch_size, shuffle=True, num_workers=args.workers, drop_last=True)
     print(len(dload_real), len(dload_fake))
@@ -345,13 +347,13 @@ def test_clf(f, args):
         return final_samples
 
     if args.dataset == "cifar_train":
-        dset = torchvision.datasets.CIFAR10(root="~/data", transform=transform_test, download=True, train=True)
+        dset = torchvision.datasets.CIFAR10(root=DATA_PATH, transform=transform_test, download=True, train=True)
     elif args.dataset == "cifar_test":
-        dset = torchvision.datasets.CIFAR10(root="~/data", transform=transform_test, download=True, train=False)
+        dset = torchvision.datasets.CIFAR10(root=DATA_PATH, transform=transform_test, download=True, train=False)
     elif args.dataset == "svhn_train":
-        dset = torchvision.datasets.SVHN(root="~/data", transform=transform_test, download=True, split="train")
+        dset = torchvision.datasets.SVHN(root=DATA_PATH, transform=transform_test, download=True, split="train")
     else:  # args.dataset == "svhn_test":
-        dset = torchvision.datasets.SVHN(root="~/data", transform=transform_test, download=True, split="test")
+        dset = torchvision.datasets.SVHN(root=DATA_PATH, transform=transform_test, download=True, split="test")
 
     dload = DataLoader(dset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers, drop_last=False)
 
@@ -413,7 +415,7 @@ def eval_ece(f, args):
                 accuracy_in_bin = accuracies[in_bin].float().mean()
                 avg_confidence_in_bin = confidences[in_bin].mean()
                 ece += torch.abs(avg_confidence_in_bin - accuracy_in_bin) * prop_in_bin
-        print(ece)
+        print("ECE error:", ece)
 
         ax.bar(bins[:-1], bin_corrects, width=width)
         ax.plot([0, 1], [0, 1], "--", color="gray")
@@ -422,6 +424,7 @@ def eval_ece(f, args):
         ax.set_ylabel("Accuracy")
         ax.set_xlabel("Confidence")
         f.tight_layout()
+        plt.text(0.25, 0.75, "ECE error = {:.3%}".format(ece.item()), transform=plt.gca().transAxes)
         plt.savefig(args.log_dir + "/ece.png")
 
     def sample(x, n_steps=args.n_steps):
@@ -435,13 +438,13 @@ def eval_ece(f, args):
         return final_samples
 
     if args.dataset == "cifar_train":
-        dset = torchvision.datasets.CIFAR10(root="~/data", transform=transform_test, download=True, train=True)
+        dset = torchvision.datasets.CIFAR10(root=DATA_PATH, transform=transform_test, download=True, train=True)
     elif args.dataset == "cifar_test":
-        dset = torchvision.datasets.CIFAR10(root="~/data", transform=transform_test, download=True, train=False)
+        dset = torchvision.datasets.CIFAR10(root=DATA_PATH, transform=transform_test, download=True, train=False)
     elif args.dataset == "svhn_train":
-        dset = torchvision.datasets.SVHN(root="~/data", transform=transform_test, download=True, split="train")
+        dset = torchvision.datasets.SVHN(root=DATA_PATH, transform=transform_test, download=True, split="train")
     elif args.dataset == "svhn_test":
-        dset = torchvision.datasets.SVHN(root="~/data", transform=transform_test, download=True, split="test")
+        dset = torchvision.datasets.SVHN(root=DATA_PATH, transform=transform_test, download=True, split="test")
 
     dload = DataLoader(dset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers, drop_last=False)
 
