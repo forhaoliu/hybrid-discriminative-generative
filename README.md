@@ -15,21 +15,18 @@ Includes codes and scripts for training UDGE and baselines using WideResNet.
 For any questions/issues please contact hao.liu@cs.berkeley.edu.
 
 ## Usage
-The experiment environemnt is provided in [this conda env](udge.yaml).
+The experiment environemnt is provided in [this conda env](conda.yaml).
 ### Training
 To train a model on CIFAR10 as in the paper
 ```markdown
+# Baseline model: JEM: log q(y|x) + log q(x)
+python train_wrn.py --lr .0001 --dataset cifar10 --optimizer adam --pyxce 1.0 --pxsgld 1.0 --sigma .03 --width 10 --depth 28 --warmup_iters 1000 --log_dir ./save --id YOUR_EXP_ID
+
 # UDGE: log q(y|x) + log q(x|y)
-python train_wrn_ebm.py --lr .0001 --dataset cifar10 --optimizer adam --pyxce 1.0 --pxycontrast 1.0 --sigma .03 --width 10 --depth 28 --warmup_iters 1000 --log_dir ./save --id YOUR_EXP_ID
-
-# UDGE: log q(x|y)
-python train_wrn_ebm.py --lr .0001 --dataset cifar10 --optimizer adam --pxycontrast 1.0 --sigma .03 --width 10 --depth 28 --warmup_iters 1000 --log_dir ./save --id YOUR_EXP_ID
-
-# JEM: log q(y|x) + log q(x)
-python train_wrn_ebm.py --lr .0001 --dataset cifar10 --optimizer adam --pyxce 1.0 --pxsgld 1.0 --sigma .03 --width 10 --depth 28 --warmup_iters 1000 --log_dir ./save --id YOUR_EXP_ID
+python train_wrn.py --lr .0001 --dataset cifar10 --optimizer adam --pyxce 1.0 --pxycontrast 1.0 --sigma .03 --width 10 --depth 28 --warmup_iters 1000 --log_dir ./save --id YOUR_EXP_ID
 
 # UDGE + marginal likelihood: log q(y|x) + log q(x|y) + log q(x) (for generative tasks)
-python train_wrn_ebm.py --lr .0001 --dataset cifar10 --optimizer adam --pyxce 1.0 --pxycontrast 1.0 --pxsgld 1.0 --sigma .03 --width 10 --depth 28 --warmup_iters 1000 --log_dir ./save --id YOUR_EXP_ID
+python train_wrn.py --lr .0001 --dataset cifar10 --optimizer adam --pyxce 1.0 --pxycontrast 1.0 --pxsgld 1.0 --sigma .03 --width 10 --depth 28 --warmup_iters 1000 --log_dir ./save --id YOUR_EXP_ID
 ```
 ***NOTE***
 

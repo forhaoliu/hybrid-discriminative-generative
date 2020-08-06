@@ -1,16 +1,12 @@
-import logging
 import os
-import time
+import random
 
 import numpy as np
 import torch
 import torch.nn as nn
 import torchvision
-import torchvision.datasets as datasets
-import torchvision.models as models
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Dataset
-from tqdm import tqdm
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -101,7 +97,7 @@ class DataSubset(Dataset):
         return len(self.inds)
 
 
-def init_random(args, bs):
+def init_random(bs):
     return torch.FloatTensor(bs, n_ch, im_sz, im_sz).uniform_(-1, 1)
 
 
@@ -172,7 +168,8 @@ def save_checkpoint(state, save, epoch):
 def isnan(tensor):
     return tensor != tensor
 
-def set_seed(seed):
+
+def set_seed(args):
     if args.seed is not None:
         torch.manual_seed(args.seed)
         np.random.seed(args.seed)
@@ -182,6 +179,7 @@ def set_seed(seed):
             torch.cuda.manual_seed_all(args.seed)
             torch.backends.cudnn.deterministic = True
             torch.backends.cudnn.benchmark = True
+
 
 def smooth_one_hot(labels, classes, smoothing=0.0):
     """

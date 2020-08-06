@@ -2,9 +2,6 @@ import argparse
 import copy
 import json
 import os
-import random
-import sys
-import uuid
 from collections import OrderedDict
 from os.path import abspath, basename, dirname
 from types import SimpleNamespace
@@ -19,16 +16,14 @@ import seaborn as sns
 import torch
 import torch.nn as nn
 import torchvision
-import torchvision.datasets as datasets
-import torchvision.models as models
 import torchvision.transforms as transforms
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-import wideresnet
+
 from logger import logger, setup_logger
 from model import CCF, HYM, F
-from utils import DataSubset, KHotCrossEntropyLoss, checkpoint, cycle, eval_classification, get_data, init_random, plot, set_seed, smooth_one_hot
+from utils import init_random, plot, set_seed, smooth_one_hot
 
 
 sns.set_style("whitegrid")
@@ -470,11 +465,10 @@ def eval_ece(f, args):
 
 def main(args):
     if args.pxycontrast > 0:
-        model_cls = HYM
-        f = model_cls(args.depth, args.width, args.norm, K=args.contrast_k, T=args.contrast_t)
+        f = HYM(args)
     else:
         model_cls = F if args.uncond else CCF
-        f = model_cls(args.depth, args.width, args.norm)
+        f = model_cls(args)
     print(f"loading model from {args.load_path}")
 
     # load em up
@@ -583,7 +577,7 @@ if __name__ == "__main__":
     overwrite.dataset = args.dataset
     args = overwrite
     os.makedirs(args.log_dir, exist_ok=True)
-    set_seed(args.seed)
+    set_seed(args)
     configs = OrderedDict(sorted(vars(args).items(), key=lambda x: x[0]))
     setup_logger(exp_prefix=args.exp_prefix, variant=configs, log_dir=args.log_dir)
     with open(f"{args.log_dir}/params.txt", "w") as f:

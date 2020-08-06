@@ -2,21 +2,14 @@ import argparse
 import copy
 import json
 import os
-import random
 import sys
 import uuid
 from collections import OrderedDict
 from os.path import abspath, basename, dirname
 from types import SimpleNamespace
 
-import numpy as np
 import torch
 import torch.nn as nn
-import torchvision
-import torchvision.datasets as datasets
-import torchvision.models as models
-import torchvision.transforms as transforms
-from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 from logger import logger, setup_logger
 
@@ -28,17 +21,14 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def get_model_and_buffer(args, sample_q):
     if args.pxycontrast > 0 or args.pxyjointcontrast > 0 or args.pxcontrast > 0:
-        model_cls = HYM
-        f = model_cls(
-            args.depth, args.width, args.norm, dropout_rate=args.dropout_rate, n_classes=args.n_classes, K=args.contrast_k, T=args.contrast_t
-        )
+        f = HYM(args)
     else:
         model_cls = F if args.uncond else CCF
-        f = model_cls(args.depth, args.width, args.norm, dropout_rate=args.dropout_rate, n_classes=args.n_classes)
+        f = model_cls(args)
     if not args.uncond:
         assert args.buffer_size % args.n_classes == 0, "Buffer size must be divisible by args.n_classes"
     if args.load_path is None:
-        replay_buffer = init_random(args, args.buffer_size)
+        replay_buffer = init_random(args.buffer_size)
     else:
         print(f"loading model from {args.load_path}")
         ckpt_dict = torch.load(args.load_path)
@@ -52,7 +42,7 @@ def get_model_and_buffer(args, sample_q):
 def get_sample_q(args):
     def sample_p_0(replay_buffer, bs, y=None):
         if len(replay_buffer) == 0:
-            return init_random(args, bs), []
+            return init_random(bs), []
         buffer_size = len(replay_buffer) if y is None else len(replay_buffer) // args.n_classes
         inds = torch.randint(0, buffer_size, (bs,))
         # if cond, convert inds to class conditional inds
@@ -60,7 +50,7 @@ def get_sample_q(args):
             inds = y.cpu() * buffer_size + inds
             assert not args.uncond, "Can't drawn conditional samples without giving me y"
         buffer_samples = replay_buffer[inds]
-        random_samples = init_random(args, bs)
+        random_samples = init_random(bs)
         choose_random = (torch.rand(bs) < args.reinit_freq).float()[:, None, None, None]
         samples = choose_random * random_samples + (1 - choose_random) * buffer_samples
         return samples.to(device), inds
@@ -373,7 +363,7 @@ if __name__ == "__main__":
 
     args.plot_contrast = 1 if (args.pxycontrast > 0 and args.plot_contrast) else 0
     args.n_classes = 100 if args.dataset == "cifar100" else 10
-    set_seed(args.seed)
+    set_seed(args)
     os.makedirs(args.log_dir, exist_ok=True)
     configs = OrderedDict(sorted(vars(args).items(), key=lambda x: x[0]))
     setup_logger(exp_prefix=args.exp_prefix, variant=configs, log_dir=args.log_dir)

@@ -1,28 +1,13 @@
-import argparse
-import json
-import os
-import sys
-import uuid
-from collections import OrderedDict
-
-import numpy as np
 import torch
 import torch.nn as nn
-import torchvision
-import torchvision.transforms as transforms
-from torch.utils.data import DataLoader, Dataset
-from tqdm import tqdm
 
-import utils
 import wideresnet
-from utils import KHotCrossEntropyLoss, smooth_one_hot
-import torchvision.models as models
 
 
 class F(nn.Module):
     def __init__(self, args):
         super(F, self).__init__()
-        self.f = wideresnet.Wide_ResNet(args.depth, args.width, args.norm, args.dropout_rate)
+        self.f = wideresnet.Wide_ResNet(depth=args.depth, widen_factor=args.width, norm=args.norm, dropout_rate=args.dropout_rate)
         self.energy_output = nn.Linear(self.f.last_dim, 1)
         self.class_output = nn.Linear(self.f.last_dim, args.n_classes)
 
@@ -51,12 +36,12 @@ class HYM(CCF):
     def __init__(self, args):
         super(HYM, self).__init__(args)
 
-        self.K = args.K
-        self.T = args.T
+        self.K = args.contrast_k
+        self.T = args.contrast_t
         self.dim = args.n_classes
 
         # create the queue
-        init_logit = torch.randn(args.n_classes, args.K)
+        init_logit = torch.randn(args.n_classes, args.contrast_k)
         self.register_buffer("queue_logit", init_logit)
         self.register_buffer("queue_ptr", torch.zeros(1, dtype=torch.long))
 
